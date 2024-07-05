@@ -22,4 +22,4 @@ pip install pygame
 
 ## Screenshots
 
-<img src="image.png" alt="프로그램 실행 화면" width="75%" />
+<img src="image.png" alt="프로그램 실행 화면" width="40%" />
