@@ -4,7 +4,8 @@
 
 ## How to run?
 
-[pygame](https://github.com/pygame/pygame)에 의존성이 있습니다. 다음 명령어를 사용해 설치할 수 있습니다.
+우선 이 프로젝트의 폴더를 다운로드 받아주세요.  
+이 프로젝트는 [pygame](https://github.com/pygame/pygame)에 의존성이 있습니다. 다음 명령어를 사용해 설치할 수 있습니다.
 
 ```powershell
 pip install pygame
