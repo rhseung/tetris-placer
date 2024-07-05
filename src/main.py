@@ -5,12 +5,12 @@ import sys
 
 init()
 
-screen_size = (450, 600)
+grid_size = 30
+row, col = 20, int(input("열의 수를 입력해주세요: "))
+
+screen_size = (150 + grid_size*col, grid_size*row)
 screen = display.set_mode(screen_size)
 display.set_caption("Tetris Placer")
-
-grid_size = 30
-row, col = 20, 10
 
 # 그리드 초기화
 GridType = list[list[int]]
@@ -18,13 +18,13 @@ grids: GridType = [[None] * col for _ in range(row)]
 
 # 가방 스프라이트
 bags = [
-    TetriminoSprite(tetriminos.I, (375, 50), 30),
-    TetriminoSprite(tetriminos.O, (375, 130), 30),
-    TetriminoSprite(tetriminos.T, (375, 210), 30),
-    TetriminoSprite(tetriminos.J, (375, 290), 30),
-    TetriminoSprite(tetriminos.L, (375, 370), 30),
-    TetriminoSprite(tetriminos.S, (375, 450), 30),
-    TetriminoSprite(tetriminos.Z, (375, 530), 30)
+    TetriminoSprite(tetriminos.I, (screen_size[0] - 75, 50), 30),
+    TetriminoSprite(tetriminos.O, (screen_size[0] - 75, 130), 30),
+    TetriminoSprite(tetriminos.T, (screen_size[0] - 75, 210), 30),
+    TetriminoSprite(tetriminos.J, (screen_size[0] - 75, 290), 30),
+    TetriminoSprite(tetriminos.L, (screen_size[0] - 75, 370), 30),
+    TetriminoSprite(tetriminos.S, (screen_size[0] - 75, 450), 30),
+    TetriminoSprite(tetriminos.Z, (screen_size[0] - 75, 530), 30)
 ]
 
 # 드래그 관련 상태 변수
