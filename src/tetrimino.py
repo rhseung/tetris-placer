@@ -24,7 +24,7 @@ class Tetrimino:
             for j, cell in enumerate(row):
                 if cell == 1:
                     draw.rect(screen, darken_color(self.color) if darken else self.color, ((c+j)*grid_size, (r+i)*grid_size, grid_size, grid_size))
-                    draw.rect(screen, (25, 25, 25), ((c+j)*grid_size, (r+i)*grid_size, grid_size, grid_size), width=1)
+                    draw.rect(screen, 0x191919, ((c+j)*grid_size, (r+i)*grid_size, grid_size, grid_size), width=1)
 
     def draw_at(self, x: int, y: int, screen: Surface, grid_size: int=30, darken: bool=False):
         r = len(self.shape)
@@ -35,7 +35,7 @@ class Tetrimino:
             for j, cell in enumerate(row):
                 if cell == 1:
                     draw.rect(screen, darken_color(self.color) if darken else self.color, (x - c/2*grid_size + j*grid_size, y - r/2*grid_size + i*grid_size, grid_size, grid_size))
-                    draw.rect(screen, (25, 25, 25), (x - c/2*grid_size + j*grid_size, y - r/2*grid_size + i*grid_size, grid_size, grid_size), width=1)
+                    draw.rect(screen, 0x191919, (x - c/2*grid_size + j*grid_size, y - r/2*grid_size + i*grid_size, grid_size, grid_size), width=1)
 
 class Tetriminos(SingleTon):
     I: Tetrimino

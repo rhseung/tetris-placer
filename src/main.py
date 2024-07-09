@@ -39,6 +39,7 @@ is_ctrl_pressed: bool = False
 is_z_pressed: bool = False
 is_y_pressed: bool = False
 key_sleep: bool = False
+is_mouse_pressed: bool = False
 
 # undo, redo
 undo: list[GridType] = []
@@ -95,26 +96,30 @@ while running:
                                 grids[projected.grid_y + i][projected.grid_x + j] = dragged.tetrimino.color
                                 animations.append((projected.grid_y + i, projected.grid_x + j))
                     duration = 1
-                    
-                # 줄 완성되면 지우기
-                for i, row_list in enumerate(grids):
-                    if all(cell is not None for cell in row_list):
-                        animations.extend([(i, j) for j in range(col)])
-                        grids.pop(i)
-                        grids.insert(0, [None] * col)
                 
                 dragging = False
                 dragged = None
                 projected = None
                 clicked_diff_pos = (None, None)
+             
+            # 줄 완성되면 지우기
+            for i, row_list in enumerate(grids):
+                if all(cell is not None for cell in row_list):
+                    animations.extend([(i, j) for j in range(col)])
+                    grids.pop(i)
+                    grids.insert(0, [None] * col)
         
         # 미노 돌리기 및 undo, redo
         elif evt.type == KEYDOWN:
             if dragging:
-                if evt.key == K_x:
+                if evt.key == K_c:
                     dragged.rotate()
                     if projected is not None:
                         projected.rotate()
+                elif evt.key == K_x:
+                    dragged.rotate(-1)
+                    if projected is not None:
+                        projected.rotate(-1)
 
             if evt.key == K_LCTRL:
                 is_ctrl_pressed = True
@@ -151,12 +156,11 @@ while running:
         for c in range(col):
             if grids[r][c] is not None:
                 draw.rect(screen, grids[r][c], (c*grid_size, r*grid_size, grid_size, grid_size))
-            draw.rect(screen, (25, 25, 25), (c*grid_size, r*grid_size, grid_size, grid_size), width=1)
+            draw.rect(screen, 0x191919, (c*grid_size, r*grid_size, grid_size, grid_size), width=1)
         
     # 애니메이션 그리기
     if duration > 0:
         for r, c in animations:
-            # draw.rect(screen, (255 * duration, 255 * duration, 255 * duration), (c*grid_size, r*grid_size, grid_size, grid_size))
             # transparent surface를 만들어서 마스크로 사용
             mask = Surface((grid_size, grid_size), SRCALPHA)
             mask.fill((255, 255, 255, 255 * duration))
@@ -193,7 +197,59 @@ while running:
             projected.grid_y = None
             dragged.move_to(mouse_x, mouse_y)
             dragged.draw_at(screen)
+    
+    else:   # 1*1 미노 관리
+        mouse_buttons = mouse.get_pressed()
+        is_mouse_pressed = [False] * len(mouse_buttons)
+        
+        mouse_x, mouse_y = mouse.get_pos()
+        grid_x = mouse_x // grid_size
+        grid_y = mouse_y // grid_size
+        buff = []   # 그리드에 1*1 미노 추가할 좌표
+        
+        if 0 <= grid_y < row and 0 <= grid_x < col:
+            if mouse_buttons[0]:    # 배치
+                is_mouse_pressed[0] = True
+                
+                if grids[grid_y][grid_x] is None:
+                    undo.append(deepcopy(grids))
+                    redo = []
+                
+                    grids[grid_y][grid_x] = 0x323232
+                    animations.append((grid_y, grid_x))
+            elif is_mouse_pressed[0]:
+                is_mouse_pressed[0] = False
+                duration = 1
+            
+            if mouse_buttons[2]:    # 지우기
+                ...
+            elif is_mouse_pressed[2]:
+                is_mouse_pressed[2] = False
+                duration = 1
+        
+        elif is_mouse_pressed:
+            is_mouse_pressed = False
+            duration = 1
 
+            # 줄 완성되면 지우기
+            for i, row_list in enumerate(grids):
+                if all(cell is not None for cell in row_list):
+                    animations.extend([(i, j) for j in range(col)])
+                    grids.pop(i)
+                    grids.insert(0, [None] * col)
+        elif mouse_buttons[2]:  # 지우기
+            mouse_x, mouse_y = mouse.get_pos()
+            grid_x = mouse_x // grid_size
+            grid_y = mouse_y // grid_size
+            
+            if 0 <= grid_y < row and 0 <= grid_x < col and grids[grid_y][grid_x] is not None:
+                undo.append(deepcopy(grids))
+                redo = []
+            
+                grids[grid_y][grid_x] = None
+                animations.append((grid_y, grid_x))
+            duration = 1
+    
     display.flip()
     display.update()
 
