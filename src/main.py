@@ -120,6 +120,10 @@ while running:
                     dragged.rotate(-1)
                     if projected is not None:
                         projected.rotate(-1)
+                elif evt.key == K_a:
+                    dragged.rotate(2)
+                    if projected is not None:
+                        projected.rotate(2)
 
             if evt.key == K_LCTRL:
                 is_ctrl_pressed = True
