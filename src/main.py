@@ -2,6 +2,7 @@ from pygame import *
 from tetrimino import *
 from copy import deepcopy
 import sys
+import os
 
 init()
 
@@ -114,7 +115,9 @@ while running:
         
         # 미노 돌리기 및 undo, redo
         elif evt.type == KEYDOWN:
-            if dragging:
+            if evt.key == K_ESCAPE:
+                os.execl(sys.executable, sys.executable, *sys.argv)
+            elif dragging:
                 if evt.key == K_c:
                     dragged.rotate()
                     if projected is not None:
