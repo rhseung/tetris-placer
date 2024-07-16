@@ -6,7 +6,7 @@ import sys
 init()
 
 grid_size = 30
-row, col = 20, int(input("열의 수를 입력해주세요: "))
+row, col = 20, 10
 
 screen_size = (150 + grid_size*col, grid_size*row)
 screen = display.set_mode(screen_size)
@@ -44,6 +44,7 @@ is_mouse_pressed: bool = False
 # undo, redo
 undo: list[GridType] = []
 redo: list[GridType] = []
+is_mouse_pressed = [False] * 3
 
 # animation blocks
 animations: list[tuple[int, int]] = []  # animation할 좌표를 저장
@@ -66,7 +67,7 @@ while running:
                     projected = deepcopy(mino)
                     clicked_diff_pos = (mouse_x - dragged.rect.x, mouse_y - dragged.rect.y)
         
-        # 드래그 끝
+        # 드래그 끝 
         elif evt.type == MOUSEBUTTONUP:
             if dragging:    # grids에 projected 넣기
                 can_place = True
@@ -102,12 +103,14 @@ while running:
                 projected = None
                 clicked_diff_pos = (None, None)
              
-            # 줄 완성되면 지우기
-            for i, row_list in enumerate(grids):
-                if all(cell is not None for cell in row_list):
-                    animations.extend([(i, j) for j in range(col)])
-                    grids.pop(i)
-                    grids.insert(0, [None] * col)
+                # 줄 완성되면 지우기
+                for i, row_list in enumerate(grids):
+                    if all(cell is not None for cell in row_list):
+                        animations.extend([(i, j) for j in range(col)])
+                        grids.pop(i)
+                        grids.insert(0, [None] * col)
+                # if animations and duration == 0:
+                #     duration = 1
         
         # 미노 돌리기 및 undo, redo
         elif evt.type == KEYDOWN:
@@ -204,55 +207,54 @@ while running:
     
     else:   # 1*1 미노 관리
         mouse_buttons = mouse.get_pressed()
-        is_mouse_pressed = [False] * len(mouse_buttons)
-        
         mouse_x, mouse_y = mouse.get_pos()
         grid_x = mouse_x // grid_size
         grid_y = mouse_y // grid_size
+        
         buff = []   # 그리드에 1*1 미노 추가할 좌표
         
         if 0 <= grid_y < row and 0 <= grid_x < col:
-            if mouse_buttons[0]:    # 배치
+            if mouse_buttons[0] == True:    # 배치
+                if is_mouse_pressed[0] == False:
+                    undo.append(deepcopy(grids))
+                    redo = []
+                    
                 is_mouse_pressed[0] = True
                 
-                if grids[grid_y][grid_x] is None:
+                if grids[grid_y][grid_x] is None:                
+                    grids[grid_y][grid_x] = 0x323232
+                    animations.append((grid_y, grid_x))
+            elif is_mouse_pressed[0] == True:
+                is_mouse_pressed[0] = False
+                if animations and duration == 0:
+                    duration = 1
+            
+            if mouse_buttons[2] == True:    # 지우기
+                if is_mouse_pressed[2] == False:
                     undo.append(deepcopy(grids))
                     redo = []
                 
-                    grids[grid_y][grid_x] = 0x323232
+                is_mouse_pressed[2] = True
+                
+                if grids[grid_y][grid_x] is not None:                
+                    grids[grid_y][grid_x] = None
                     animations.append((grid_y, grid_x))
-            elif is_mouse_pressed[0]:
-                is_mouse_pressed[0] = False
-                duration = 1
-            
-            if mouse_buttons[2]:    # 지우기
-                ...
-            elif is_mouse_pressed[2]:
+            elif is_mouse_pressed[2] == True:
                 is_mouse_pressed[2] = False
-                duration = 1
+                if animations and duration == 0:
+                    duration = 1
         
-        elif is_mouse_pressed:
-            is_mouse_pressed = False
+        # 줄 완성되면 지우기
+        for i, row_list in enumerate(grids):
+            if all(cell is not None for cell in row_list):
+                animations.extend([(i, j) for j in range(col)])
+                grids.pop(i)
+                grids.insert(0, [None] * col)
+        
+        if is_mouse_pressed[0] == False and animations and duration == 0:
             duration = 1
-
-            # 줄 완성되면 지우기
-            for i, row_list in enumerate(grids):
-                if all(cell is not None for cell in row_list):
-                    animations.extend([(i, j) for j in range(col)])
-                    grids.pop(i)
-                    grids.insert(0, [None] * col)
-        elif mouse_buttons[2]:  # 지우기
-            mouse_x, mouse_y = mouse.get_pos()
-            grid_x = mouse_x // grid_size
-            grid_y = mouse_y // grid_size
-            
-            if 0 <= grid_y < row and 0 <= grid_x < col and grids[grid_y][grid_x] is not None:
-                undo.append(deepcopy(grids))
-                redo = []
-            
-                grids[grid_y][grid_x] = None
-                animations.append((grid_y, grid_x))
-            duration = 1
+    
+    # print(len(undo), len(redo))
     
     display.flip()
     display.update()
