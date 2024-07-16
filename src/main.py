@@ -3,14 +3,33 @@ from tetrimino import *
 from copy import deepcopy
 import sys
 import os
+import argparse
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('-col', type=int, default=10, help='an integer for the column value')
+args = parser.parse_args()
+
+print('''
+Keybinds:
+    - Mouse Left Click (And Drag): Place 1x1 block
+    - Mouse Right Click (And Drag): Remove 1x1 block
+    - Drag and Drop: Place tetrimino
+    - C: Rotate clockwise
+    - X: Rotate counterclockwise
+    - A: Rotate 180 degrees
+    - Ctrl + Z: Undo
+    - Ctrl + Y: Redo
+    - ESC: Restart
+    - Q: Quit
+''')
 
 init()
 
 grid_size = 30
-row, col = 20, 10
+row, col = 20, args.col
 
 screen_size = (150 + grid_size*col, grid_size*row)
-screen = display.set_mode(screen_size)
+screen = display.set_mode(screen_size, NOFRAME)
 display.set_caption("Tetris Placer")
 
 # 그리드 초기화
@@ -117,6 +136,8 @@ while running:
         elif evt.type == KEYDOWN:
             if evt.key == K_ESCAPE:
                 os.execl(sys.executable, sys.executable, *sys.argv)
+            elif evt.key == K_q:
+                exit()
             elif dragging:
                 if evt.key == K_c:
                     dragged.rotate()
@@ -160,6 +181,8 @@ while running:
 
     # 화면 그리기
     screen.fill((0, 0, 0))
+    border_rect = Rect(0, 0, screen_size[0], screen_size[1])
+    draw.rect(screen, 0x191919, border_rect, width=5)
     
     # 그리드 그리기
     for r in range(row):
@@ -248,16 +271,15 @@ while running:
                     duration = 1
         
         # 줄 완성되면 지우기
-        for i, row_list in enumerate(grids):
-            if all(cell is not None for cell in row_list):
-                animations.extend([(i, j) for j in range(col)])
-                grids.pop(i)
-                grids.insert(0, [None] * col)
+        if is_mouse_pressed[0] == False and is_mouse_pressed[2] == False:
+            for i, row_list in enumerate(grids):
+                if all(cell is not None for cell in row_list):
+                    animations.extend([(i, j) for j in range(col)])
+                    grids.pop(i)
+                    grids.insert(0, [None] * col)
         
         if is_mouse_pressed[0] == False and animations and duration == 0:
             duration = 1
-    
-    # print(len(undo), len(redo))
     
     display.flip()
     display.update()
