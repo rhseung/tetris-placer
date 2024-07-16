@@ -29,7 +29,7 @@ grid_size = 30
 row, col = 20, args.col
 
 screen_size = (150 + grid_size*col, grid_size*row)
-screen = display.set_mode(screen_size, NOFRAME)
+screen = display.set_mode(screen_size)
 display.set_caption("Tetris Placer")
 
 # 그리드 초기화
