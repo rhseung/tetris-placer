@@ -19,10 +19,16 @@ cd tetris-placer
 python src/main.py
 ```
 
-아래와 같이 보드의 컬럼 수를 조정할 수도 있습니다.
+아래와 같이 `--col` 옵션을 사용해 보드의 컬럼 수를 조정할 수도 있습니다.
 
 ```powershell
-python src/main.py -col 20
+python src/main.py --col=20
+```
+
+아래와 같이 `--mix` 를 사용하면 가방을 섞을 수 있습니다.
+
+```powershell
+python src/main.py --mix
 ```
 
 ## How to use?
