@@ -1,12 +1,14 @@
 from pygame import *
 from tetrimino import *
 from copy import deepcopy
+from random import shuffle
 import sys
 import os
 import argparse
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('-col', type=int, default=10, help='an integer for the column value')
+parser = argparse.ArgumentParser(description='Tetris Placer')
+parser.add_argument('--col', type=int, default=10, help='an integer for the column value')
+parser.add_argument('--mix', action=argparse.BooleanOptionalAction, help='mix the tetrimino bag')
 args = parser.parse_args()
 
 print('''
@@ -37,15 +39,19 @@ GridType = list[list[int]]
 grids: GridType = [[None] * col for _ in range(row)]
 
 # 가방 스프라이트
-bags = [
-    TetriminoSprite(tetriminos.I, (screen_size[0] - 75, 50), 30),
-    TetriminoSprite(tetriminos.O, (screen_size[0] - 75, 130), 30),
-    TetriminoSprite(tetriminos.T, (screen_size[0] - 75, 210), 30),
-    TetriminoSprite(tetriminos.J, (screen_size[0] - 75, 290), 30),
-    TetriminoSprite(tetriminos.L, (screen_size[0] - 75, 370), 30),
-    TetriminoSprite(tetriminos.S, (screen_size[0] - 75, 450), 30),
-    TetriminoSprite(tetriminos.Z, (screen_size[0] - 75, 530), 30)
-]
+start, step = 50, 80
+def index_to_center(i: int) -> tuple[int, int]:
+    return (screen_size[0] - 75, i * step + start)
+def center_to_index(center: tuple[int, int]) -> int:
+    return (center[1] - start) // step
+bag = [TetriminoSprite(mino, index_to_center(i), 30) for i, mino in enumerate(tetriminos)]
+
+# 미노들의 위치를 섞어줌
+if args.mix:
+    centers = [mino.rect.center for mino in bag]
+    shuffle(centers)
+    for i, mino in enumerate(bag):
+        mino.rect.center = centers[i]
 
 # 드래그 관련 상태 변수
 running: bool = True
@@ -80,7 +86,7 @@ while running:
         # 드래그 시작
         elif evt.type == MOUSEBUTTONDOWN:
             mouse_x, mouse_y = evt.pos
-            for mino in bags:
+            for mino in bag:
                 if mino.rect.collidepoint(mouse_x, mouse_y):
                     dragging = True
                     dragged = deepcopy(mino)
@@ -205,7 +211,7 @@ while running:
             animations = []
     
     # 오른쪽에 가방 그리기
-    for mino in bags:
+    for mino in bag:
         mino.draw_at(screen)
 
     # 드래그
